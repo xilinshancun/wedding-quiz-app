@@ -116,12 +116,27 @@ export interface AnswerResult {
 /** 奖励日志 */
 export interface RewardLog {
   id: number;
-  log_type: string;           // 日志类型
-  amount: number;             // 变动数量
-  balance_after: number;      // 变动后余额
-  note: string | null;        // 备注
-  admin_operator: string | null; // 操作管理员
+  user_id: number;
+  user_nickname: string | null;
+  user_display_code: string | null;
+  log_type: string;
+  amount: number;
+  balance_after: number;
+  note: string | null;
+  admin_operator: string | null;
   created_at: string;
+}
+
+/** 题目（管理后台用） */
+export interface QuestionAdmin {
+  id: number;
+  bank_id: number;
+  question_type: 'single_choice' | 'fill_blank';
+  content: string;
+  options: string | null;
+  correct_answer: string;
+  is_answered: boolean;
+  answered_by_nickname: string | null;
 }
 
 /** 仪表盘统计数据 */
@@ -203,5 +218,21 @@ export const api = {
       }),
     /** 获取所有奖励日志 */
     getLogs: () => request<RewardLog[]>('/api/admin/logs'),
+    
+    /** 获取题库下所有题目 */
+    getBankQuestions: (bankId: number) => request<QuestionAdmin[]>(`/api/admin/banks/${bankId}/questions`),
+    /** 创建题目 */
+    createQuestion: (data: { bank_id: number; question_type: string; content: string; options?: string; correct_answer: string }) =>
+      request<QuestionAdmin>('/api/admin/questions', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    /** 删除题目 */
+    deleteQuestion: (questionId: number) =>
+      request<{ message: string }>(`/api/admin/questions/${questionId}`, { method: 'DELETE' }),
+    /** 一键重置所有数据 */
+    resetAll: () => request<{ message: string }>('/api/admin/reset/all', { method: 'POST' }),
+    /** 重置单个题库 */
+    resetBank: (bankId: number) => request<{ message: string }>(`/api/admin/reset/bank/${bankId}`, { method: 'POST' }),
   },
 };

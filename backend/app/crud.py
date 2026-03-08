@@ -368,3 +368,140 @@ def get_dashboard_stats(db: Session) -> schemas.DashboardStats:
         total_reward_claimed=total_reward_claimed,
         banks=banks
     )
+
+
+# ============ 题目管理 ============
+
+def get_questions_by_bank(db: Session, bank_id: int) -> list[dict]:
+    """获取题库下所有题目（管理后台用）"""
+    questions = db.query(models.Question).filter(
+        models.Question.bank_id == bank_id
+    ).order_by(models.Question.id).all()
+    
+    result = []
+    for q in questions:
+        answered_by_nickname = None
+        if q.answered_by_id:
+            user = db.query(models.User).filter(models.User.id == q.answered_by_id).first()
+            if user:
+                answered_by_nickname = user.nickname
+        
+        result.append({
+            "id": q.id,
+            "bank_id": q.bank_id,
+            "question_type": q.question_type,
+            "content": q.content,
+            "options": q.options,
+            "correct_answer": q.correct_answer,
+            "is_answered": q.is_answered,
+            "answered_by_nickname": answered_by_nickname
+        })
+    return result
+
+
+def create_question(db: Session, data: schemas.QuestionCreate) -> models.Question:
+    """创建题目"""
+    question = models.Question(
+        bank_id=data.bank_id,
+        question_type=data.question_type,
+        content=data.content,
+        options=data.options,
+        correct_answer=data.correct_answer
+    )
+    db.add(question)
+    db.commit()
+    db.refresh(question)
+    return question
+
+
+def delete_question(db: Session, question_id: int) -> bool:
+    """删除题目"""
+    question = db.query(models.Question).filter(models.Question.id == question_id).first()
+    if not question:
+        return False
+    
+    # 删除相关的答题记录
+    db.query(models.SessionAnswer).filter(
+        models.SessionAnswer.question_id == question_id
+    ).delete()
+    
+    db.delete(question)
+    db.commit()
+    return True
+
+
+def reset_all_data(db: Session) -> dict:
+    """
+    一键重置所有答题数据
+    
+    重置内容：
+    - 所有题目的答题状态
+    - 所有用户的答题统计和奖励
+    - 删除所有会话和答题记录
+    - 删除所有奖励日志
+    """
+    # 重置题目状态
+    db.query(models.Question).update({
+        models.Question.is_answered: False,
+        models.Question.answered_by_id: None,
+        models.Question.answered_at: None
+    })
+    
+    # 删除答题记录
+    answers_deleted = db.query(models.SessionAnswer).delete()
+    
+    # 删除会话
+    sessions_deleted = db.query(models.QuizSession).delete()
+    
+    # 删除奖励日志
+    logs_deleted = db.query(models.RewardLog).delete()
+    
+    # 重置用户统计
+    users_reset = db.query(models.User).update({
+        models.User.total_correct: 0,
+        models.User.reward_balance: 0,
+        models.User.reward_claimed: 0
+    })
+    
+    db.commit()
+    
+    return {
+        "questions_reset": db.query(models.Question).count(),
+        "answers_deleted": answers_deleted,
+        "sessions_deleted": sessions_deleted,
+        "logs_deleted": logs_deleted,
+        "users_reset": users_reset
+    }
+
+
+def reset_bank_questions(db: Session, bank_id: int) -> int:
+    """重置单个题库的答题状态"""
+    # 获取题库下所有题目 ID
+    question_ids = [q.id for q in db.query(models.Question.id).filter(
+        models.Question.bank_id == bank_id
+    ).all()]
+    
+    if not question_ids:
+        return 0
+    
+    # 删除相关答题记录
+    db.query(models.SessionAnswer).filter(
+        models.SessionAnswer.question_id.in_(question_ids)
+    ).delete(synchronize_session=False)
+    
+    # 删除相关会话
+    db.query(models.QuizSession).filter(
+        models.QuizSession.bank_id == bank_id
+    ).delete(synchronize_session=False)
+    
+    # 重置题目状态
+    count = db.query(models.Question).filter(
+        models.Question.bank_id == bank_id
+    ).update({
+        models.Question.is_answered: False,
+        models.Question.answered_by_id: None,
+        models.Question.answered_at: None
+    }, synchronize_session=False)
+    
+    db.commit()
+    return count

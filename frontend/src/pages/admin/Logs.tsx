@@ -78,6 +78,7 @@ export default function AdminLogs() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">时间</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">用户</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">类型</th>
                   <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">数量</th>
                   <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">余额</th>
@@ -90,6 +91,16 @@ export default function AdminLogs() {
                   <tr key={log.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {new Date(log.created_at).toLocaleString('zh-CN')}
+                    </td>
+                    <td className="px-4 py-3">
+                      {log.user_nickname ? (
+                        <Link to={`/admin/users/${log.user_id}`} className="hover:underline">
+                          <span className="text-gray-800">{log.user_nickname}</span>
+                          <span className="ml-1 text-xs text-blue-600">({log.user_display_code})</span>
+                        </Link>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded text-sm ${getLogTypeColor(log.log_type)}`}>

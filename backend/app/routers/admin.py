@@ -146,5 +146,99 @@ def get_all_logs(
     admin: str = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    """获取所有奖励操作日志"""
-    return crud.get_all_reward_logs(db, skip, limit)
+    """获取所有奖励操作日志（包含用户信息）"""
+    logs = crud.get_all_reward_logs(db, skip, limit)
+    result = []
+    for log in logs:
+        user = crud.get_user_by_id(db, log.user_id)
+        result.append(schemas.RewardLogResponse(
+            id=log.id,
+            user_id=log.user_id,
+            user_nickname=user.nickname if user else None,
+            user_display_code=user.display_code if user else None,
+            log_type=log.log_type,
+            amount=log.amount,
+            balance_after=log.balance_after,
+            note=log.note,
+            admin_operator=log.admin_operator,
+            created_at=log.created_at
+        ))
+    return result
+
+
+# ============ 题目管理 ============
+
+@router.get("/banks/{bank_id}/questions", response_model=list[schemas.QuestionAdminResponse])
+def get_bank_questions(
+    bank_id: int,
+    admin: str = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """获取题库下所有题目"""
+    bank = crud.get_question_bank(db, bank_id)
+    if not bank:
+        raise HTTPException(status_code=404, detail="题库不存在")
+    return crud.get_questions_by_bank(db, bank_id)
+
+
+@router.post("/questions", response_model=schemas.QuestionAdminResponse)
+def create_question(
+    data: schemas.QuestionCreate,
+    admin: str = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """创建题目"""
+    bank = crud.get_question_bank(db, data.bank_id)
+    if not bank:
+        raise HTTPException(status_code=404, detail="题库不存在")
+    
+    question = crud.create_question(db, data)
+    return {
+        "id": question.id,
+        "bank_id": question.bank_id,
+        "question_type": question.question_type,
+        "content": question.content,
+        "options": question.options,
+        "correct_answer": question.correct_answer,
+        "is_answered": question.is_answered,
+        "answered_by_nickname": None
+    }
+
+
+@router.delete("/questions/{question_id}")
+def delete_question(
+    question_id: int,
+    admin: str = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """删除题目"""
+    if not crud.delete_question(db, question_id):
+        raise HTTPException(status_code=404, detail="题目不存在")
+    return {"message": "删除成功"}
+
+
+# ============ 重置功能 ============
+
+@router.post("/reset/all")
+def reset_all(
+    admin: str = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """一键重置所有答题数据"""
+    result = crud.reset_all_data(db)
+    return {"message": "重置成功", **result}
+
+
+@router.post("/reset/bank/{bank_id}")
+def reset_bank(
+    bank_id: int,
+    admin: str = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """重置单个题库的答题状态"""
+    bank = crud.get_question_bank(db, bank_id)
+    if not bank:
+        raise HTTPException(status_code=404, detail="题库不存在")
+    
+    count = crud.reset_bank_questions(db, bank_id)
+    return {"message": f"已重置 {count} 道题目"}

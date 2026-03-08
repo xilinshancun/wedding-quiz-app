@@ -12,6 +12,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/Users';
 import AdminUserDetail from './pages/admin/UserDetail';
 import AdminLogs from './pages/admin/Logs';
+import AdminQuestions from './pages/admin/Questions';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/users/:userId" element={<AdminUserDetail />} />
         <Route path="/admin/logs" element={<AdminLogs />} />
+        <Route path="/admin/banks/:bankId/questions" element={<AdminQuestions />} />
       </Routes>
     </BrowserRouter>
   );

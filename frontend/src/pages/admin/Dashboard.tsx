@@ -52,6 +52,20 @@ export default function AdminDashboard() {
     navigate('/admin');
   };
 
+  /** 一键重置所有数据 */
+  const handleResetAll = async () => {
+    if (!confirm('确定要重置所有答题数据吗？\n\n这将清除：\n- 所有题目的答题状态\n- 所有用户的答题统计和奖励\n- 所有答题记录和奖励日志\n\n此操作不可恢复！')) return;
+    if (!confirm('再次确认：真的要重置吗？')) return;
+    
+    try {
+      const result = await api.admin.resetAll();
+      alert(result.message);
+      loadStats();
+    } catch (err) {
+      alert('重置失败: ' + (err as Error).message);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -69,6 +83,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-4">
             <Link to="/admin/users" className="text-blue-600 hover:underline">用户管理</Link>
             <Link to="/admin/logs" className="text-blue-600 hover:underline">操作日志</Link>
+            <button onClick={handleResetAll} className="text-yellow-600 hover:underline">一键重置</button>
             <button onClick={handleLogout} className="text-red-600 hover:underline">退出</button>
           </div>
         </div>
@@ -138,6 +153,15 @@ export default function AdminDashboard() {
                       已抢光
                     </div>
                   )}
+                  {/* 管理按钮 */}
+                  <div className="mt-3">
+                    <Link 
+                      to={`/admin/banks/${bank.id}/questions`}
+                      className="block text-center bg-blue-50 text-blue-600 py-2 rounded hover:bg-blue-100"
+                    >
+                      管理题目
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>

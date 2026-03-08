@@ -62,6 +62,21 @@ class QuestionResponse(BaseModel):
         from_attributes = True
 
 
+class QuestionAdminResponse(BaseModel):
+    """题目响应（管理后台用，包含答案和状态）"""
+    id: int
+    bank_id: int
+    question_type: QuestionType
+    content: str
+    options: Optional[str] = None
+    correct_answer: str
+    is_answered: bool
+    answered_by_nickname: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
 # ============ 用户相关 ============
 
 class UserResponse(BaseModel):
@@ -134,6 +149,9 @@ class NextQuestionResponse(BaseModel):
 class RewardLogResponse(BaseModel):
     """奖励日志"""
     id: int
+    user_id: int
+    user_nickname: Optional[str] = None
+    user_display_code: Optional[str] = None
     log_type: RewardLogType
     amount: int
     balance_after: int
