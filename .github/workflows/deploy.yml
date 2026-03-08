@@ -7,7 +7,6 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: wedding-quiz-2026
-  PYTHON_VERSION: '3.11'
   NODE_VERSION: '20'
 
 jobs:
@@ -35,13 +34,6 @@ jobs:
         run: |
           rm -rf backend/static
           cp -r frontend/dist backend/static
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: backend/requirements.txt
 
       - name: Create deployment package
         working-directory: backend
