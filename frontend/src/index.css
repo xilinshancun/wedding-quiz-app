@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+@import "tailwindcss";
+
+/* 自定义主题变量 */
+@theme {
+  --color-wedding-red: #D4374A;
+  --color-wedding-gold: #C9A962;
+  --color-wedding-pink: #F5E6E8;
+  --color-wedding-cream: #FDF8F5;
+  --font-family-wedding: 'Ma Shan Zheng', cursive, sans-serif;
+}
+
+:root {
+  --wedding-red: #D4374A;
+  --wedding-gold: #C9A962;
+  --wedding-pink: #F5E6E8;
+  --wedding-cream: #FDF8F5;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(180deg, #FDF8F5 0%, #F5E6E8 100%);
+  min-height: 100vh;
+}
+
+.wedding-title {
+  font-family: 'Ma Shan Zheng', cursive, sans-serif;
+}
+
+.wedding-card {
+  background: linear-gradient(135deg, #fff 0%, #FDF8F5 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(212, 55, 74, 0.1);
+}
+
+.wedding-btn {
+  background: linear-gradient(135deg, #D4374A 0%, #E85A6B 100%);
+  color: white;
+  border-radius: 25px;
+  padding: 12px 32px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(212, 55, 74, 0.3);
+}
+
+.wedding-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 55, 74, 0.4);
+}
+
+.wedding-btn:active {
+  transform: translateY(0);
+}
+
+.wedding-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.lantern {
+  position: relative;
+  display: inline-block;
+}
+
+.lantern::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 10px;
+  background: #C9A962;
+  border-radius: 10px 10px 0 0;
+}
+
+.option-btn {
+  background: white;
+  border: 2px solid #F5E6E8;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: left;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.option-btn:hover {
+  border-color: #D4374A;
+  background: #FDF8F5;
+}
+
+.option-btn.selected {
+  border-color: #D4374A;
+  background: linear-gradient(135deg, #FDF8F5 0%, #F5E6E8 100%);
+}
+
+.flower-decoration {
+  position: fixed;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.flower-top-left {
+  top: 0;
+  left: 0;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle at 30% 30%, #F5B7B1 0%, transparent 70%);
+}
+
+.flower-bottom-right {
+  bottom: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle at 70% 70%, #F5B7B1 0%, transparent 70%);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(212, 55, 74, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(212, 55, 74, 0.5); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
