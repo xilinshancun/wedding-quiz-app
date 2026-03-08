@@ -226,6 +226,7 @@ export default function AdminQuestions() {
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">ID</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">类型</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">题目内容</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">选项</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">答案</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">状态</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-gray-500">操作</th>
@@ -242,8 +243,21 @@ export default function AdminQuestions() {
                       {q.question_type === 'single_choice' ? '单选' : '填空'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-800 max-w-md truncate">{q.content}</td>
-                  <td className="px-4 py-3 text-gray-600 text-sm">{q.correct_answer}</td>
+                  <td className="px-4 py-3 text-gray-800 max-w-xs">
+                    <div className="truncate" title={q.content}>{q.content}</div>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 text-sm max-w-xs">
+                    {q.question_type === 'single_choice' && q.options ? (
+                      <div className="space-y-1">
+                        {q.options.split('|').map((opt, idx) => (
+                          <div key={idx} className="text-xs">{opt}</div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 text-sm font-medium">{q.correct_answer}</td>
                   <td className="px-4 py-3 text-center">
                     {q.is_answered ? (
                       <span className="text-green-600 text-sm">
