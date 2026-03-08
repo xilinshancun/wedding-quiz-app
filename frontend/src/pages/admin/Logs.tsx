@@ -90,7 +90,7 @@ export default function AdminLogs() {
                 {logs.map((log) => (
                   <tr key={log.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm text-gray-600">
-                      {new Date(log.created_at).toLocaleString('zh-CN')}
+                      {new Date(log.created_at).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}
                     </td>
                     <td className="px-4 py-3">
                       {log.user_nickname ? (
