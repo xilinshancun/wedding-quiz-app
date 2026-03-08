@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from .. import crud, schemas, models
 from ..database import get_db
 from ..auth import verify_admin, create_access_token, get_current_admin
+from ..config import get_settings
 
 router = APIRouter(prefix="/api/admin", tags=["管理后台"])
 
@@ -146,11 +147,11 @@ def get_all_logs(
     admin: str = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    """获取所有奖励操作日志（包含用户信息）"""
+    """获取所有奖励操作日志（包含用户信息，已优化 N+1 查询）"""
     logs = crud.get_all_reward_logs(db, skip, limit)
     result = []
     for log in logs:
-        user = crud.get_user_by_id(db, log.user_id)
+        user = log.user
         result.append(schemas.RewardLogResponse(
             id=log.id,
             user_id=log.user_id,
@@ -219,12 +220,22 @@ def delete_question(
 
 # ============ 重置功能 ============
 
+def verify_reset_password(password: str) -> bool:
+    """验证重置密码"""
+    settings = get_settings()
+    return password == settings.reset_password
+
+
 @router.post("/reset/all")
 def reset_all(
+    data: schemas.ResetRequest,
     admin: str = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    """一键重置所有答题数据"""
+    """一键重置所有答题数据（需要密码验证）"""
+    if not verify_reset_password(data.password):
+        raise HTTPException(status_code=403, detail="重置密码错误")
+    
     result = crud.reset_all_data(db)
     return {"message": "重置成功", **result}
 
@@ -232,10 +243,14 @@ def reset_all(
 @router.post("/reset/bank/{bank_id}")
 def reset_bank(
     bank_id: int,
+    data: schemas.ResetRequest,
     admin: str = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    """重置单个题库的答题状态"""
+    """重置单个题库的答题状态（需要密码验证）"""
+    if not verify_reset_password(data.password):
+        raise HTTPException(status_code=403, detail="重置密码错误")
+    
     bank = crud.get_question_bank(db, bank_id)
     if not bank:
         raise HTTPException(status_code=404, detail="题库不存在")

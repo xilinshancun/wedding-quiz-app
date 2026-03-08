@@ -170,6 +170,11 @@ class RewardAdjust(BaseModel):
     note: Optional[str] = None
 
 
+class ResetRequest(BaseModel):
+    """重置请求（需要密码验证）"""
+    password: str
+
+
 # ============ 管理后台相关 ============
 
 class AdminLogin(BaseModel):

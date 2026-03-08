@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     admin_username: str = "admin"
     admin_password: str = "admin123"
     
+    # 重置密码（用于一键重置功能）
+    reset_password: str = "linjiu1024"
+    
     # 服务器配置
     host: str = "0.0.0.0"
     port: int = 8000

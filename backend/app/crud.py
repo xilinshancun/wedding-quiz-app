@@ -5,7 +5,7 @@
 """
 from datetime import datetime, timedelta
 from typing import Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from . import models, schemas
 from .utils import check_answer
@@ -16,6 +16,7 @@ def get_or_create_user(db: Session, device_id: str) -> models.User:
     获取或创建用户
     
     根据设备 ID 查找用户，如果不存在则创建新用户
+    使用 ON CONFLICT 处理并发创建的竞态条件
     """
     user = db.query(models.User).filter(models.User.device_id == device_id).first()
     if user:
@@ -23,15 +24,26 @@ def get_or_create_user(db: Session, device_id: str) -> models.User:
         db.commit()
         return user
     
-    user = models.User(
-        device_id=device_id,
-        nickname=models.generate_nickname(),
-        display_code=models.User.generate_display_code(),
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+    # 尝试创建新用户，处理并发时的唯一约束冲突
+    try:
+        user = models.User(
+            device_id=device_id,
+            nickname=models.generate_nickname(),
+            display_code=models.User.generate_display_code(),
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+    except Exception:
+        db.rollback()
+        # 并发创建时可能已被其他请求创建，重新查询
+        user = db.query(models.User).filter(models.User.device_id == device_id).first()
+        if user:
+            user.last_active_at = datetime.utcnow()
+            db.commit()
+            return user
+        raise
 
 
 def get_user_by_id(db: Session, user_id: int) -> Optional[models.User]:
@@ -305,7 +317,9 @@ def adjust_reward(
         # 增加奖励
         user.reward_balance += amount
     elif log_type == models.RewardLogType.ADMIN_DEDUCT:
-        # 扣减奖励
+        # 扣减奖励（不允许扣成负数）
+        if user.reward_balance < amount:
+            raise ValueError(f"用户余额不足，当前余额: {user.reward_balance}")
         user.reward_balance -= amount
     
     # 记录日志
@@ -332,8 +346,10 @@ def get_user_reward_logs(db: Session, user_id: int, limit: int = 50) -> list[mod
 
 
 def get_all_reward_logs(db: Session, skip: int = 0, limit: int = 100) -> list[models.RewardLog]:
-    """获取所有奖励日志"""
-    return db.query(models.RewardLog).order_by(
+    """获取所有奖励日志，使用 joinedload 预加载用户信息"""
+    return db.query(models.RewardLog).options(
+        joinedload(models.RewardLog.user)
+    ).order_by(
         models.RewardLog.created_at.desc()
     ).offset(skip).limit(limit).all()
 
@@ -373,18 +389,16 @@ def get_dashboard_stats(db: Session) -> schemas.DashboardStats:
 # ============ 题目管理 ============
 
 def get_questions_by_bank(db: Session, bank_id: int) -> list[dict]:
-    """获取题库下所有题目（管理后台用）"""
-    questions = db.query(models.Question).filter(
+    """获取题库下所有题目（管理后台用），使用 joinedload 避免 N+1 查询"""
+    questions = db.query(models.Question).options(
+        joinedload(models.Question.answered_by)
+    ).filter(
         models.Question.bank_id == bank_id
     ).order_by(models.Question.id).all()
     
     result = []
     for q in questions:
-        answered_by_nickname = None
-        if q.answered_by_id:
-            user = db.query(models.User).filter(models.User.id == q.answered_by_id).first()
-            if user:
-                answered_by_nickname = user.nickname
+        answered_by_nickname = q.answered_by.nickname if q.answered_by else None
         
         result.append({
             "id": q.id,

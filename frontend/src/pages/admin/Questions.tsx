@@ -88,10 +88,14 @@ export default function AdminQuestions() {
 
   const handleResetBank = async () => {
     if (!bankId) return;
+    
+    const password = prompt('请输入重置密码：');
+    if (!password) return;
+    
     if (!confirm('确定要重置该题库的所有答题状态吗？这将清除所有答题记录。')) return;
     
     try {
-      const result = await api.admin.resetBank(parseInt(bankId));
+      const result = await api.admin.resetBank(parseInt(bankId), password);
       alert(result.message);
       loadData();
     } catch (err) {

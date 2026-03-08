@@ -56,15 +56,11 @@ export default function AdminDashboard() {
   const handleResetAll = async () => {
     const password = prompt('请输入重置密码：');
     if (!password) return;
-    if (password !== 'linjiu1024') {
-      alert('密码错误！');
-      return;
-    }
     
     if (!confirm('确定要重置所有答题数据吗？\n\n这将清除：\n- 所有题目的答题状态\n- 所有用户的答题统计和奖励\n- 所有答题记录和奖励日志\n\n此操作不可恢复！')) return;
     
     try {
-      const result = await api.admin.resetAll();
+      const result = await api.admin.resetAll(password);
       alert(result.message);
       loadStats();
     } catch (err) {

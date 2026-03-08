@@ -36,6 +36,9 @@ def check_answer(user_answer: str, correct_answer: str) -> bool:
     支持多个可接受答案（用 | 分隔）
     例如：correct_answer = "玫瑰|玫瑰花" 表示两个答案都正确
     """
+    if not user_answer or not user_answer.strip():
+        return False
+    
     user_normalized = normalize_answer(user_answer)
     
     acceptable_answers = correct_answer.split("|")

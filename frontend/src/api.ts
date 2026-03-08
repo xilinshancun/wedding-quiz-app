@@ -230,9 +230,15 @@ export const api = {
     /** 删除题目 */
     deleteQuestion: (questionId: number) =>
       request<{ message: string }>(`/api/admin/questions/${questionId}`, { method: 'DELETE' }),
-    /** 一键重置所有数据 */
-    resetAll: () => request<{ message: string }>('/api/admin/reset/all', { method: 'POST' }),
-    /** 重置单个题库 */
-    resetBank: (bankId: number) => request<{ message: string }>(`/api/admin/reset/bank/${bankId}`, { method: 'POST' }),
+    /** 一键重置所有数据（需要密码） */
+    resetAll: (password: string) => request<{ message: string }>('/api/admin/reset/all', { 
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }),
+    /** 重置单个题库（需要密码） */
+    resetBank: (bankId: number, password: string) => request<{ message: string }>(`/api/admin/reset/bank/${bankId}`, { 
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }),
   },
 };
