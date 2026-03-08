@@ -16,6 +16,7 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
   useEffect(() => {
     // 检查登录状态
@@ -25,7 +26,15 @@ export default function AdminUsers() {
       return;
     }
     loadUsers();
-  }, [navigate]);
+    
+    // 自动刷新（每 5 秒）
+    const interval = setInterval(() => {
+      if (autoRefresh) {
+        loadUsers(search || undefined);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [navigate, autoRefresh, search]);
 
   /** 加载用户列表 */
   const loadUsers = async (query?: string) => {
@@ -77,6 +86,13 @@ export default function AdminUsers() {
             className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
           >
             重置
+          </button>
+          <button
+            type="button"
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            className={`px-4 py-2 rounded-lg ${autoRefresh ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+          >
+            {autoRefresh ? '自动刷新: 开' : '自动刷新: 关'}
           </button>
         </form>
 
