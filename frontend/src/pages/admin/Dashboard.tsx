@@ -120,53 +120,53 @@ export default function AdminDashboard() {
 
             {/* 题库状态 */}
             <h2 className="text-xl font-bold text-gray-800 mb-4">题库状态</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {stats.banks.map((bank) => (
-                <div key={bank.id} className="bg-white rounded-xl p-6 shadow">
-                  <h3 className="font-bold text-lg text-gray-800 mb-3">{bank.name}</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">总题数</span>
-                      <span className="font-medium">{bank.total_questions}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">剩余题数</span>
-                      <span className={`font-medium ${bank.remaining_questions < 5 ? 'text-red-600' : 'text-green-600'}`}>
-                        {bank.remaining_questions}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">答题人数</span>
-                      <span className="font-medium text-blue-600">{bank.active_players}</span>
-                    </div>
-                    {/* 进度条 */}
-                    <div className="mt-3">
-                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full ${bank.remaining_questions === 0 ? 'bg-red-500' : 'bg-green-500'}`}
-                          style={{ width: `${(bank.remaining_questions / bank.total_questions) * 100}%` }}
-                        />
+            {stats.banks.length > 0 && (() => {
+              const bank = stats.banks[0];
+              return (
+                <div className="max-w-md">
+                  <div className="bg-white rounded-xl p-6 shadow">
+                    <h3 className="font-bold text-lg text-gray-800 mb-3">{bank.name}</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">总题数</span>
+                        <span className="font-medium">{bank.total_questions}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">剩余题数</span>
+                        <span className={`font-medium ${bank.remaining_questions < 5 ? 'text-red-600' : 'text-green-600'}`}>
+                          {bank.remaining_questions}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">答题人数</span>
+                        <span className="font-medium text-blue-600">{bank.active_players}</span>
+                      </div>
+                      <div className="mt-3">
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${bank.remaining_questions === 0 ? 'bg-red-500' : 'bg-green-500'}`}
+                            style={{ width: `${(bank.remaining_questions / bank.total_questions) * 100}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  {/* 已抢光标记 */}
-                  {bank.remaining_questions === 0 && (
-                    <div className="mt-3 bg-red-100 text-red-600 text-center py-1 rounded text-sm">
-                      已抢光
+                    {bank.remaining_questions === 0 && (
+                      <div className="mt-3 bg-red-100 text-red-600 text-center py-1 rounded text-sm">
+                        已抢光
+                      </div>
+                    )}
+                    <div className="mt-3">
+                      <Link
+                        to={`/admin/banks/${bank.id}/questions`}
+                        className="block text-center bg-blue-50 text-blue-600 py-2 rounded hover:bg-blue-100"
+                      >
+                        管理题目
+                      </Link>
                     </div>
-                  )}
-                  {/* 管理按钮 */}
-                  <div className="mt-3">
-                    <Link 
-                      to={`/admin/banks/${bank.id}/questions`}
-                      className="block text-center bg-blue-50 text-blue-600 py-2 rounded hover:bg-blue-100"
-                    >
-                      管理题目
-                    </Link>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })()}
           </>
         )}
       </div>

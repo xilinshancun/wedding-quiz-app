@@ -61,79 +61,75 @@ export default function Display() {
         <p className="text-white/80 text-xl">扫码参与互动答题 赢取精美礼品</p>
       </div>
 
-      {/* 题库灯笼网格 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-        {banks.map((bank) => (
-          <div key={bank.id} className="relative">
-            <div className="lantern-container">
-              {/* 灯笼主体 */}
-              <div className="bg-gradient-to-b from-red-500 to-red-700 rounded-t-full rounded-b-3xl p-6 shadow-2xl border-4 border-yellow-500">
-                {/* 灯笼顶部装饰 */}
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="w-8 h-4 bg-yellow-500 rounded-t-lg" />
-                  <div className="w-2 h-6 bg-yellow-600 mx-auto" />
-                </div>
-                
-                {/* 题库名称 */}
-                <div className="text-center mb-4">
-                  <h2 className="wedding-title text-2xl text-yellow-300">{bank.name}</h2>
-                </div>
-                
-                {/* 二维码 */}
-                <div className="bg-white rounded-xl p-3 mb-4">
-                  <QRCodeSVG
-                    value={`${baseUrl}/bank/${bank.id}`}
-                    size={140}
-                    level="M"
-                    className="mx-auto"
-                  />
-                </div>
-                
-                {/* 统计数据 */}
-                <div className="text-center text-white space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span>剩余题目</span>
-                    <span className="font-bold text-yellow-300">
-                      {bank.remaining_questions}/{bank.total_questions}
-                    </span>
+      {/* 单个题库灯笼 */}
+      {banks.length > 0 && (() => {
+        const bank = banks[0];
+        return (
+          <div className="flex justify-center max-w-md mx-auto">
+            <div className="relative w-full">
+              <div className="lantern-container">
+                <div className="bg-gradient-to-b from-red-500 to-red-700 rounded-t-full rounded-b-3xl p-8 shadow-2xl border-4 border-yellow-500">
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="w-8 h-4 bg-yellow-500 rounded-t-lg" />
+                    <div className="w-2 h-6 bg-yellow-600 mx-auto" />
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>剩余空闲</span>
-                    <span className="font-bold text-yellow-300">
-                      {bank.available_questions}
-                    </span>
+
+                  <div className="text-center mb-4">
+                    <h2 className="wedding-title text-3xl text-yellow-300">{bank.name}</h2>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>正在答题</span>
-                    <span className="font-bold text-yellow-300">{bank.active_players} 人</span>
+
+                  <div className="bg-white rounded-xl p-4 mb-4">
+                    <QRCodeSVG
+                      value={`${baseUrl}/bank/${bank.id}`}
+                      size={200}
+                      level="M"
+                      className="mx-auto"
+                    />
                   </div>
+
+                  <div className="text-center text-white space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>剩余题目</span>
+                      <span className="font-bold text-yellow-300">
+                        {bank.remaining_questions}/{bank.total_questions}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>剩余空闲</span>
+                      <span className="font-bold text-yellow-300">
+                        {bank.available_questions}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>正在答题</span>
+                      <span className="font-bold text-yellow-300">{bank.active_players} 人</span>
+                    </div>
+                  </div>
+
+                  {bank.remaining_questions === 0 && (
+                    <div className="absolute inset-0 bg-black/50 rounded-t-full rounded-b-3xl flex items-center justify-center">
+                      <span className="text-yellow-300 text-xl font-bold transform -rotate-12">
+                        已抢光
+                      </span>
+                    </div>
+                  )}
                 </div>
-                
-                {/* 已抢光遮罩 */}
-                {bank.remaining_questions === 0 && (
-                  <div className="absolute inset-0 bg-black/50 rounded-t-full rounded-b-3xl flex items-center justify-center">
-                    <span className="text-yellow-300 text-xl font-bold transform -rotate-12">
-                      已抢光
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              {/* 灯笼底部流苏 */}
-              <div className="flex justify-center">
-                <div className="w-1 h-8 bg-yellow-600" />
-              </div>
-              <div className="flex justify-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="w-1 h-12 bg-red-400 rounded-b-full" style={{
-                    height: `${40 + Math.random() * 20}px`
-                  }} />
-                ))}
+
+                <div className="flex justify-center">
+                  <div className="w-1 h-8 bg-yellow-600" />
+                </div>
+                <div className="flex justify-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="w-1 h-12 bg-red-400 rounded-b-full" style={{
+                      height: `${40 + Math.random() * 20}px`
+                    }} />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })()}
 
       {/* 底部提示 */}
       <div className="text-center mt-8 text-white/60 text-sm">
