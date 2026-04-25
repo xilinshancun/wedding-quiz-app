@@ -267,7 +267,7 @@ def rebuild_all(
 ):
     """彻底清空所有数据并重建题库（需要 admin secret 验证）"""
     settings = get_settings()
-    if data.admin_secret != settings.admin_password:
+    if data.admin_secret != settings.reset_password:
         raise HTTPException(status_code=403, detail="Admin Secret 错误")
 
     db.query(models.SessionAnswer).delete()
