@@ -76,17 +76,13 @@ QUIZ_QUESTIONS = [
 
 
 def init_sample_data() -> None:
-    """清空旧数据并初始化趣味答题题库"""
+    """仅在数据库为空时初始化趣味答题题库"""
     db = SessionLocal()
     try:
-        db.query(SessionAnswer).delete()
-        db.query(QuizSession).delete()
-        db.query(RewardLog).delete()
-        db.query(Question).delete()
-        db.query(QuestionBank).delete()
-        db.query(User).delete()
-        db.commit()
-        logger.info("已清空所有旧数据")
+        existing = db.query(QuestionBank).first()
+        if existing:
+            logger.info("数据库已有数据，跳过初始化")
+            return
 
         bank = QuestionBank(name="趣味答题", description="阜阳方言趣味答题")
         db.add(bank)
