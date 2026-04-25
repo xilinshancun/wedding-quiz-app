@@ -56,15 +56,35 @@ export default function AdminDashboard() {
   const handleResetAll = async () => {
     const password = prompt('请输入重置密码：');
     if (!password) return;
-    
+
     if (!confirm('确定要重置所有答题数据吗？\n\n这将清除：\n- 所有题目的答题状态\n- 所有用户的答题统计和奖励\n- 所有答题记录和奖励日志\n\n此操作不可恢复！')) return;
-    
+
     try {
       const result = await api.admin.resetAll(password);
       alert(result.message);
       loadStats();
     } catch (err) {
       alert('重置失败: ' + (err as Error).message);
+    }
+  };
+
+  /** 彻底重建题库（三次确认 + admin secret） */
+  const handleRebuildAll = async () => {
+    if (!confirm('⚠️ 第 1 步确认 ⚠️\n\n你确定要【彻底清空并重建题库】吗？\n\n这将删除：\n- 所有题库和题目\n- 所有用户数据\n- 所有答题记录和奖励\n\n此操作不可恢复！')) return;
+
+    if (!confirm('⚠️ 第 2 步确认 ⚠️\n\n再次确认：所有数据将被永久删除，无法恢复！\n\n真的要继续吗？')) return;
+
+    const adminSecret = prompt('第 3 步：请输入 Admin Secret（管理员密码）：');
+    if (!adminSecret) return;
+
+    if (!confirm('⚠️ 最终确认 ⚠️\n\n点击确定后将立即执行，不可撤销！')) return;
+
+    try {
+      const result = await api.admin.rebuildAll(adminSecret);
+      alert(result.message);
+      loadStats();
+    } catch (err) {
+      alert('重建失败: ' + (err as Error).message);
     }
   };
 
@@ -86,7 +106,8 @@ export default function AdminDashboard() {
             <Link to="/admin/users" className="text-blue-600 hover:underline">用户管理</Link>
             <Link to="/admin/logs" className="text-blue-600 hover:underline">操作日志</Link>
             <button onClick={handleResetAll} className="text-yellow-600 hover:underline">一键重置</button>
-            <button onClick={handleLogout} className="text-red-600 hover:underline">退出</button>
+            <button onClick={handleRebuildAll} className="text-red-600 hover:underline">彻底重建</button>
+            <button onClick={handleLogout} className="text-gray-600 hover:underline">退出</button>
           </div>
         </div>
       </nav>

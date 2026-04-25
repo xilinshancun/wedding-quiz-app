@@ -236,9 +236,14 @@ export const api = {
       body: JSON.stringify({ password }),
     }),
     /** 重置单个题库（需要密码） */
-    resetBank: (bankId: number, password: string) => request<{ message: string }>(`/api/admin/reset/bank/${bankId}`, { 
+    resetBank: (bankId: number, password: string) => request<{ message: string }>(`/api/admin/reset/bank/${bankId}`, {
       method: 'POST',
       body: JSON.stringify({ password }),
+    }),
+    /** 彻底重建题库（需要 admin secret） */
+    rebuildAll: (adminSecret: string) => request<{ message: string }>('/api/admin/reset/rebuild', {
+      method: 'POST',
+      body: JSON.stringify({ admin_secret: adminSecret }),
     }),
   },
 };

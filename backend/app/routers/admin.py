@@ -250,10 +250,47 @@ def reset_bank(
     """重置单个题库的答题状态（需要密码验证）"""
     if not verify_reset_password(data.password):
         raise HTTPException(status_code=403, detail="重置密码错误")
-    
+
     bank = crud.get_question_bank(db, bank_id)
     if not bank:
         raise HTTPException(status_code=404, detail="题库不存在")
-    
+
     count = crud.reset_bank_questions(db, bank_id)
     return {"message": f"已重置 {count} 道题目"}
+
+
+@router.post("/reset/rebuild")
+def rebuild_all(
+    data: schemas.RebuildRequest,
+    admin: str = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """彻底清空所有数据并重建题库（需要 admin secret 验证）"""
+    settings = get_settings()
+    if data.admin_secret != settings.admin_password:
+        raise HTTPException(status_code=403, detail="Admin Secret 错误")
+
+    db.query(models.SessionAnswer).delete()
+    db.query(models.QuizSession).delete()
+    db.query(models.RewardLog).delete()
+    db.query(models.Question).delete()
+    db.query(models.QuestionBank).delete()
+    db.query(models.User).delete()
+    db.commit()
+
+    from ..main import QUIZ_QUESTIONS
+    bank = models.QuestionBank(name="趣味答题", description="阜阳方言趣味答题")
+    db.add(bank)
+    db.flush()
+
+    for q in QUIZ_QUESTIONS:
+        db.add(models.Question(
+            bank_id=bank.id,
+            question_type=models.QuestionType.SINGLE_CHOICE,
+            content=q["content"],
+            options=q["options"],
+            correct_answer=q["answer"],
+        ))
+
+    db.commit()
+    return {"message": f"已彻底重建，共 {len(QUIZ_QUESTIONS)} 道题目"}

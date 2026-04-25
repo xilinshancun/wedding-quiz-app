@@ -175,6 +175,11 @@ class ResetRequest(BaseModel):
     password: str
 
 
+class RebuildRequest(BaseModel):
+    """彻底重建请求（需要 admin secret）"""
+    admin_secret: str
+
+
 # ============ 管理后台相关 ============
 
 class AdminLogin(BaseModel):
