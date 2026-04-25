@@ -48,7 +48,7 @@ export default function Display() {
       {/* 标题区 */}
       <div className="text-center mb-8">
         <h1 className="text-6xl font-bold text-yellow-300 mb-3" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.3)' }}>
-          趣味答题
+          喜结良缘
         </h1>
         <p className="text-white/90 text-xl tracking-wider">扫码参与互动答题 · 赢取精美礼品</p>
       </div>
