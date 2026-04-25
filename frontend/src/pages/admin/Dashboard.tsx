@@ -121,7 +121,7 @@ export default function AdminDashboard() {
             {/* 题库状态 */}
             <h2 className="text-xl font-bold text-gray-800 mb-4">题库状态</h2>
             {stats.banks.length > 0 && (() => {
-              const bank = stats.banks[0];
+              const bank = stats.banks.find(b => b.name === '趣味答题') ?? stats.banks[0];
               return (
                 <div className="max-w-md">
                   <div className="bg-white rounded-xl p-6 shadow">

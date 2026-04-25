@@ -63,7 +63,7 @@ export default function Display() {
 
       {/* 单个题库灯笼 */}
       {banks.length > 0 && (() => {
-        const bank = banks[0];
+        const bank = banks.find(b => b.name === '趣味答题') ?? banks[0];
         return (
           <div className="flex justify-center max-w-md mx-auto">
             <div className="relative w-full">
